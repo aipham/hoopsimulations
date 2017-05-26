@@ -1,0 +1,61 @@
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="ledstrip.css" />
+    <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.10.1/jquery.js"></script>
+    <script type="text/javascript" src="rAF.js"></script>
+    <script type="text/javascript" src="ledstrip.js"></script>
+    <script type="text/javascript" src="ws2812.js"></script>
+    <script type="text/javascript" src="arduino_funcs.js"></script>
+    <script type="text/javascript" src="hoop.js"></script>
+
+    <script type="text/javascript">
+    var strip, animation; // need to be global
+
+    $(document).ready(function(){
+      var container = $('.ledstrip')[0];
+      var light_count = 50;
+      var ON = true;
+      strip = LEDstrip(container, light_count);
+      driver = new Hoop(strip, 0, 0);
+      driver.init();
+      animation = driver.animate.bind(driver)();
+      $('#idPowerBtn').click(function() {
+        if (ON) {
+          animation = cancelAnimationFrame(animation);
+          driver.off();
+          ON = false;
+        }
+        else {
+          driver = new Hoop(strip, 0, 0);
+          driver.init();
+          animation = driver.animate();
+          ON = true;
+        }
+      });
+      $('#idModeBtn').click(function () {
+          driver.nextMode();
+      })
+       $('#idColorBtn').click(function () {
+          driver.nextColor();
+      })
+
+    });
+    </script>
+</head>
+<body>
+       <header>
+         <h1>LED Strip Simulator</h1>
+         <p>A software simulation of individually addressable RGB LED strips 
+         (WS2811/WS2812), often used with Arduino.</p>
+       </header>
+       <article>
+         <div class="ledstrip diffuse"></div>
+         <br />
+
+           <button id="idPowerBtn">Power</button>
+           <button id="idModeBtn">Mode</button>
+           <button id="idColorBtn">Color</button>
+
+       </article>
+     </body>
+     </html>
