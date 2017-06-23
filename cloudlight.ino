@@ -25,8 +25,8 @@ void addLight() {
   for (int i = 0; i < totalLights; i++) {
     if (lightMap[i] == -1) { mapIndex = i; }
   }
-  lightMap[mapIndex] = random(NUM_LEDS); // assign a position
-  colorMap[mapIndex] = random(sizeof(colors));
+  lightMap[mapIndex] = random(NUM_LEDS); // assign a position from 0 to 69
+  colorMap[mapIndex] = random(sizeof(colors)); // assign a colorindex
   directionalMap[mapIndex] = 1; // set to go brighter
   brightMap[mapIndex] = 10;
   activeLights++;
@@ -41,10 +41,19 @@ void removeLight(int mapIndex) {
 }
 
 void calculateColor(int result[], int colorIndex, int brightness) {
-  int color[] = { colors[colorIndex][0], colors[colorIndex][1], colors[colorIndex][2]};
-  result[0] = color[0] * brightness / 100;
-  result[1] = color[1] * brightness / 100;
-  result[2] = color[2] * brightness / 100;
+  result[0] = colors[colorIndex][0] * brightness / 100;
+  result[1] = colors[colorIndex][1] * brightness / 100;
+  result[2] = colors[colorIndex][2] * brightness / 100;
+}
+
+void checkBrightness(int mapIndex) {
+   if (brightMap[mapIndex] + (10 * directionalMap[mapIndex]) >= 100) {
+      directionalMap[mapIndex] = -1;
+    }
+    brightMap[mapIndex] += (10 * directionalMap[mapIndex]);
+    if (brightMap[mapIndex] <= 0) {
+      removeLight(mapIndex);
+    }
 }
 
 void runLights() {
@@ -52,19 +61,12 @@ void runLights() {
     addLight();
   }
   for (int i = 0; i < totalLights; i++) {
-    if (lightMap[i] > -1) {
-      int mapIndex = lightMap[i];
-      int colorAdj[3];
-      calculateColor(colorAdj, colorMap[mapIndex], brightMap[mapIndex]);
-      leds[mapIndex].setRGB(colorAdj[0], colorAdj[1], colorAdj[2]);
-      if (brightMap[mapIndex] + (10 * directionalMap[mapIndex]) >= 100) {
-        directionalMap[mapIndex] = -1;
-      }
-      brightMap[mapIndex] += (10 * directionalMap[mapIndex]);
-      if (brightMap[mapIndex] <= 0) {
-        removeLight(mapIndex);
-      }
-    }
+    if (lightMap[i] < 0) { continue; }
+    int mapIndex = lightMap[i];
+    int colorAdj[3]; //adjusted color
+    calculateColor(colorAdj, colorMap[mapIndex], brightMap[mapIndex]);
+    leds[mapIndex].setRGB(colorAdj[0], colorAdj[1], colorAdj[2]);
+    checkBrightness(mapIndex);
   }
 }
 
